@@ -108,7 +108,7 @@
 		// zeroOrientationButton: is disabled because, until at least one SERVICE_ORIENTATION update arrives it will attempt
 		// to query an update with queryUpdate() which is not supported in WC2 build 22.
 		
-		[self zeroOrientationButton:self];
+		//[self zeroOrientationButton:self];
 	}];
 	
 	// connection failed
