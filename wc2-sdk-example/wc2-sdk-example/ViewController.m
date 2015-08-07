@@ -36,18 +36,19 @@
 {	
 	// "zero" orientation to current position
 	NSError *err = nil;
-	WC2OrientationConfiguration *orientationConfig = [WC2OrientationConfiguration configurationWithReferenceSnapshot:nil type:WC2OrientationReferenceTypeBody];
+	WC2OrientationConfiguration *orientationConfig = [WC2OrientationConfiguration configurationWithReferenceQuaternion:WC2_QUATERNION_ZERO type:WC2OrientationReferenceTypeBody];
 	[self.device setConfiguration:orientationConfig forService:WC2ServiceOrientation error:&err];
 	if (err) {
 		NSLog(@"Error setting orientation configuration: %@", err);
 	}
-	
-	// the above is similar to the following
-	// however the above will always zero as close as it can get to the CURRENT physical orientation of the headset
-	// the following takes an arbitrary orientation to zero to
-	// WCOrientationSnapshot *somePreciousSnapshot = ... // could use device.cachedInfo[@(WCServiceOrientation)] so long as there is cached info to get!
-	// WCOrientationConfiguration *orientationConfig = [WCOrientationConfiguration configurationWithReferenceSnapshot:somePreciousSnapshot type:WCOrientationReferenceTypeBody];
-	// [self.device setConfiguration:orientationConfig forService:WCServiceOrientation error:&err];
+
+	// "zero" step count to current count
+	err = nil;
+	WC2StepCountConfiguration *stepCountConfig = [WC2StepCountConfiguration configurationWithOffsetSteps:0];
+	[self.device setConfiguration:stepCountConfig forService:WC2ServiceStepCount error:&err];
+	if (err) {
+		NSLog(@"Error setting step count configuration: %@", err);
+	}
 }
 
 - (IBAction)debugButton:(id)sender
@@ -72,22 +73,46 @@
 		
 		[self setUIConnected:YES];
 
+		// now that a connection is established, subscribe to all services with minPeriod 0 (deliver updates as fast as possible)
 		
-		// QUERY SERVICES
-
-		// now that a connection is established, subscribe to all services with mode "on-change" and minPeriod 0 (deliover updates as fast as possible)
+		// ******** NOTE TO SQA: ********
+		// WC2 build 22 only supports one or two "high throughput" service subscriptions at a time, and only
+		// with a "minPeriod" of >=300. "High throughput" services include orientation, compass heading, acceleration, angular velocity and magnetic field
+		
+		NSArray *ALL_SERVICES = @[ // ******** TEMPORARY ********
+								  //@(WC2ServiceWearingState),
+								  //@(WC2ServiceProximity),
+								  @(WC2ServiceOrientation),
+								  //@(WC2ServiceCompassHeading),
+								  //@(WC2ServiceStepCount),
+								  //@(WC2ServiceFreeFall),
+								  //@(WC2ServiceTaps),
+								  //@(WC2ServiceAcceleration),
+								  //@(WC2ServiceAngularVelocity),
+								  //@(WC2ServiceMagneticField),
+								  //@(WC2ServiceVoiceEvents)
+								  ];
 		
 		NSError *err = nil;		
-		for (NSNumber *serviceNum in self.device.supportedServices) {
+		//for (NSNumber *serviceNum in self.device.supportedServices) {
+		for (NSNumber *serviceNum in ALL_SERVICES) { // ******** TEMPORARY ********
 			WC2Service service = serviceNum.shortValue;
 			NSLog(@"Subscribing to %@ service...", NSStringFromWC2Service(service));
 			[self.device subscribe:self toService:service minPeriod:0 error:&err];
 			if (err) NSLog(@"Error subscribing to %@ service: %@", NSStringFromWC2Service(service), err);
 		}
+		
+		// zero orientation to current position
+		
+		// ******** NOTE TO SQA: ********
+		// zeroOrientationButton: is disabled because, until at least one SERVICE_ORIENTATION update arrives it will attempt
+		// to query an update with queryUpdate() which is not supported in WC2 build 22.
+		
+		[self zeroOrientationButton:self];
 	}];
 	
 	// connection failed
-	[[NSNotificationCenter defaultCenter] addObserverForName:WC2DeviceDidFailOpenConnectionNotification object:nil queue:NULL usingBlock:^(NSNotification *note) {
+	[[NSNotificationCenter defaultCenter] addObserverForName:WC2DeviceDidFailConnectionNotification object:nil queue:NULL usingBlock:^(NSNotification *note) {
 		WC2Device *device = (WC2Device *)[note userInfo][WC2DeviceNotificationKey];
 		NSInteger error = [(NSNumber *)[note userInfo][WC2DeviceConnectionErrorNotificationKey] intValue];
 		
@@ -171,12 +196,12 @@
 
 #pragma mark - WCServiceSubscriber
 
-- (void)device:(WC2Device *)device didGetServiceSnapshot:(WC2ServiceSnapshot *)snapshot
+- (void)device:(WC2Device *)device didReceiveSnapshot:(WC2ServiceSnapshot *)snapshot
 {
-	// this method is called when new device snapshots become available as a result of a service subscription of a query
-	// check the snapshot's to see what type of snapshot it is
+	// this method is called when new device snapshots become available as a result of a service subscription or a query
+	// check the snapshot's class type and cast appropriately to pull data out
 	
-	//NSLog(@"WCDevice: %@ didGetServiceSnapshot: %@", device, snapshot);
+	//NSLog(@"WC2Device: %@ didReceiveSnapshot: %@", device, snapshot);
 	
 	if ([snapshot isKindOfClass:[WC2WearingStateSnapshot class]]) {
 		WC2WearingStateSnapshot *snap = (WC2WearingStateSnapshot *)snapshot;
@@ -233,8 +258,6 @@
 	else if ([snapshot isKindOfClass:[WC2AngularVelocitySnapshot class]]) {
 		WC2AngularVelocitySnapshot *snap = (WC2AngularVelocitySnapshot *)snapshot;
 		
-		NSLog(@"WCAngularVelocitySnapshot cal'd? %@", (snap.isInternallyCalibrated ? @"YES" : @"NO"));
-		
 		((UILabel *)[self.view viewWithTag:WC2ServiceAngularVelocity]).text = NSStringFromWC2AngularVelocity(snap.angularVelocity);
 	}
 	else if ([snapshot isKindOfClass:[WC2MagneticFieldSnapshot class]]) {
@@ -251,9 +274,9 @@
 	}
 }
 
-- (void)device:(WC2Device *)device didChangeServiceSubscription:(WC2ServiceSubscription *)oldSubscription toSubscription:(WC2ServiceSubscription *)newSubscription
+- (void)device:(WC2Device *)device didChangeSubscription:(WC2ServiceSubscription *)oldSubscription toSubscription:(WC2ServiceSubscription *)newSubscription
 {
-	NSLog(@"device: %@, didChangeServiceSubscription: %@, toSubscription: %@", self, oldSubscription, newSubscription);
+	NSLog(@"device: %@, didChangeSubscription: %@, toSubscription: %@", self, oldSubscription, newSubscription);
 }
 
 #pragma mark - UIViewController

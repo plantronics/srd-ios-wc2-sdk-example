@@ -9,7 +9,7 @@
 #import "WC2ServiceSnapshot.h"
 
 
-#define WC_QUATERNION_ZERO	(WC2Quaternion){0, 0, 0, 0}
+#define WC2_QUATERNION_ZERO	(WC2Quaternion){0, 0, 0, 0}
 
 
 typedef struct {

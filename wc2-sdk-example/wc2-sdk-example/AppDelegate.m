@@ -11,7 +11,7 @@
 
 @interface PLTDLogger : NSObject
 + (PLTDLogger *)sharedLogger;
-@property(nonatomic,assign)	NSInteger	level;
+@property(nonatomic,assign)	NSInteger level;
 @end
 
 

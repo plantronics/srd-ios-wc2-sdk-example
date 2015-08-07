@@ -9,15 +9,14 @@
 #import <Foundation/Foundation.h>
 
 @class WC2ServiceConfiguration;
-@class WCCalibration;
 @class WC2ServiceSnapshot;
 @protocol WC2ServiceSubscriber;
 
 
 extern NSString *const WC2DeviceAvailableNotification;
 extern NSString *const WC2DeviceDidOpenConnectionNotification;
-extern NSString *const WC2DeviceDidFailOpenConnectionNotification;
 extern NSString *const WC2DeviceDidCloseConnectionNotification;
+extern NSString *const WC2DeviceDidFailConnectionNotification;
 
 extern NSString *const WC2DeviceNotificationKey;
 extern NSString *const WC2DeviceConnectionErrorNotificationKey;
@@ -108,7 +107,7 @@ NSString *NSStringFromWC2Service(WC2Service service);
 
 @protocol WC2ServiceSubscriber <NSObject>
 
-- (void)device:(WC2Device *)device didGetServiceSnapshot:(WC2ServiceSnapshot *)snapshot;
+- (void)device:(WC2Device *)device didReceiveSnapshot:(WC2ServiceSnapshot *)snapshot;
 - (void)device:(WC2Device *)device didChangeSubscription:(WC2ServiceSubscription *)oldSubscription toSubscription:(WC2ServiceSubscription *)newSubscription;
 
 @end
