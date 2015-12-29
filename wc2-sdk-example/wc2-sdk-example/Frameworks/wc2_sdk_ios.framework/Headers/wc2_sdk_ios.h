@@ -23,5 +23,3 @@
 #import "WC2AngularVelocitySnapshot.h"
 #import "WC2MagneticFieldSnapshot.h"
 #import "WC2VoiceEventSnapshot.h"
-
-

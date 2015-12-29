@@ -78,25 +78,12 @@
 		// ******** NOTE TO SQA: ********
 		// WC2 build 22 only supports one or two "high throughput" service subscriptions at a time, and only
 		// with a "minPeriod" of >=300. "High throughput" services include orientation, compass heading, acceleration, angular velocity and magnetic field
-		
-		NSArray *ALL_SERVICES = @[ // ******** TEMPORARY ********
-								  //@(WC2ServiceWearingState),
-								  //@(WC2ServiceProximity),
-								  @(WC2ServiceOrientation),
-								  //@(WC2ServiceCompassHeading),
-								  //@(WC2ServiceStepCount),
-								  //@(WC2ServiceFreeFall),
-								  //@(WC2ServiceTaps),
-								  //@(WC2ServiceAcceleration),
-								  //@(WC2ServiceAngularVelocity),
-								  //@(WC2ServiceMagneticField),
-								  //@(WC2ServiceVoiceEvents)
-								  ];
+
+        NSLog(@"self.device.supportedServices: %@", self.device.supportedServices);
 		
 		NSError *err = nil;		
-		//for (NSNumber *serviceNum in self.device.supportedServices) {
-		for (NSNumber *serviceNum in ALL_SERVICES) { // ******** TEMPORARY ********
-			WC2Service service = serviceNum.shortValue;
+		for (NSNumber *serviceNum in self.device.supportedServices) {
+            WC2Service service = serviceNum.shortValue;
 			NSLog(@"Subscribing to %@ service...", NSStringFromWC2Service(service));
 			[self.device subscribe:self toService:service minPeriod:0 error:&err];
 			if (err) NSLog(@"Error subscribing to %@ service: %@", NSStringFromWC2Service(service), err);

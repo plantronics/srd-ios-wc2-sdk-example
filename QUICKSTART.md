@@ -1,16 +1,16 @@
 # Wearable Concept 2 SDK, iOS Quick Start
 **PLT Labs**  
-API version: .8  
-Document version .8  
-August 5, 2015  
+API version: .9  
+Document version .9  
+December 29, 2015  
 [morgan.davis@plantronics.com](mailto:morgan.davis@plantronics.com)  
 
 ## Introduction
 This document serves as a quick-start to using the Wearable Concept 2 iOS SDK for building mobile applications. The iOS version of the SDK is an Objective-C implementation of the generic API described in the “WC2 Generalized API” document.## PrerequisitesTo use the WC2 SDK, your system must meet the following requirements:
-### Development Environment+	Mac OS 10.8 or later+	Xcode 6 or later### Mobile Device+	iPhone 5 or later, or iPad 4 or later, iPad mini 2 or later+	iOS 7 or later## Conventions
+### Development Environment+	Mac OS 10.10 or later+	Xcode 7 or later### Mobile Device+	iPhone 5 or later, or iPad 4 or later, iPad mini 2 or later+	iOS 8 or later## Conventions
 The iOS SDL uses several patterns to achieve the functionality outlined in the generlized API.
 
-###	Static methodsThe *WC2Device* class employs one static method, *availableDevices*, that can be used at any time to retrieve a list of paired WC2 devices, connected or not.
+###	Class methodsThe *WC2Device* class employs one static method, *availableDevices*, that can be used at any time to retrieve a list of paired WC2 devices, connected or not.
 	###	Notifications
 The SDK uses several NSNotifications available through the default notification center to relay information about device availability and connectivity changes.  
 + **WC2DeviceAvailableNotification**  
